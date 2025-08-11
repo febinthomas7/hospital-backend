@@ -1,11 +1,8 @@
 const express = require("express");
 const app = express();
-
+const AuthRouter = require("./Routes/AuthRouter")
 // Root route
-app.get("/", (req, res) => {
-  res.socket.setTimeout(1000 * 60 * 60); // Set timeout to 1 hour
-  res.send("<h1>backend</h1>");
-});
+app.use("/auth", AuthRouter);
 
 // Specify the port
 const port = 3000;
