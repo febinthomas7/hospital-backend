@@ -1,11 +1,16 @@
 const router = require("express").Router();
+const wrapAsync=require("../utils/wrapAsync.js");
+const multer  = require("multer");
+const {storage} = require("../cloudConfig.js");
+const upload = multer({ storage });
+
 // const {
 //   signin,
 //   login,
 //   request_reset,
 //   verify_otp,
 //   send_welcome_email,
-// } = require("../Controllers/AuthController");
+// } = require("../Controllers/Patient");
 
 
 // const {

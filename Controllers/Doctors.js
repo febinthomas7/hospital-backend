@@ -1,0 +1,1 @@
+const Doctor =require("../Models/Doctor");
