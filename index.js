@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const { Client } = require('pg');
 
 const ExpressError=require("./Utils/expressError");
 const patientRoute = require("./Routes/Pateint");
@@ -11,6 +12,17 @@ if(process.env.NODE_ENV != "production"){
 }
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Middleware to parse JSON bodies
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+});
+
+client.connect()
+  .then(() => console.log('Connected to Neon PostgreSQL database!'))
+  .catch(err => console.error('Connection error', err.stack));
+
+
 
 // Root route
 app.use("/patient",patientRoute);
