@@ -1,43 +1,38 @@
-// server.js or a dedicated router file
-const express = require('express');
 const { Client } = require('pg');
-const bcrypt = require('bcrypt'); // For password hashing
 require('dotenv').config();
-
-const router = express.Router();
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }, // Needed for Neon
 });
 
-client.connect();
-
-// Route to create a new doctor record
-router.post('/doctors', async (req, res) => {
-  const { name, email, password, phone_no, date_of_birth, address, npi_id, specialization } = req.body;
-  
+async function initDoctorTable() {
   try {
-    // Hash the password for security
-    const password_hash = await bcrypt.hash(password, 10);
-    
-    const query = `
-      INSERT INTO hospital.doctors (name, email, password_hash, phone_no, date_of_birth, address, npi_id, specialization)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING doctor_id;
-    `;
-    const values = [name, email, password_hash, phone_no, date_of_birth, address, npi_id, specialization];
-    
-    const result = await client.query(query, values);
-    
-    res.status(201).json({
-      message: 'Doctor record created successfully!',
-      doctorId: result.rows[0].doctor_id,
-    });
+    await client.connect();
 
-  } catch (error) {
-    console.error('Error creating doctor record:', error);
-    res.status(500).json({ error: 'Failed to create doctor record.' });
+    // Create doctors table if it doesn't exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS Doctors (
+        doctor_id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(150) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        phone_no VARCHAR(20),
+        date_of_birth DATE,
+        address TEXT,
+        specialization VARCHAR(100),
+        npi_id VARCHAR(50), -- add this column first
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        CONSTRAINT fk_hospital
+          FOREIGN KEY (npi_id) REFERENCES Hospitals(npi_id)
+      );
+    `);
+
+  } catch (err) {
+    console.error("❌ Error creating doctors table:", err);
+  } finally {
+    await client.end();
   }
-});
+}
 
-module.exports = router;
+module.exports = { initDoctorTable };

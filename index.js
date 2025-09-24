@@ -1,26 +1,31 @@
 const express = require("express");
 const app = express();
-const { Client } = require('pg');
 
 const ExpressError=require("./Utils/expressError");
 const patientRoute = require("./Routes/Pateint");
 const DoctorRoute = require("./Routes/Doctor");
 const HospitalRoute = require("./Routes/Hospital");
 
-if(process.env.NODE_ENV != "production"){
-  require("dotenv").config();
-}
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Middleware to parse JSON bodies
 
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-});
+const bodyParser = require('body-parser');
+require('dotenv').config();
 
-client.connect()
-  .then(() => console.log('Connected to Neon PostgreSQL database!'))
-  .catch(err => console.error('Connection error', err.stack));
+const { initDoctorTable } = require('./Models/Doctor.js');
+const { initNoticeTable } = require("./Models/Notice.js");
+const { initPatientTable } = require("./Models/Patient.js");
+const { initReportTable } = require("./Models/Reports.js");
+const { initHospitalTable } = require("./Models/Hospital.js");
+
+app.use(bodyParser.json());
+
+// Initialize table on startup
+initHospitalTable();
+initDoctorTable();
+initNoticeTable();
+initPatientTable();
+initReportTable();
 
 
 

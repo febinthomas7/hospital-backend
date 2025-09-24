@@ -1,45 +1,40 @@
-// routes/reports.js
-const express = require('express');
+
 const { Client } = require('pg');
-const router = express.Router();
 require('dotenv').config();
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
-client.connect();
 
-// Route to create a new report
-router.post('/reports', async (req, res) => {
-  const {
-    patient_adhaar, npi_id, doctor_id, date_of_issue,
-    title, description, priority, category
-  } = req.body;
-
+async function initReportTable() {
   try {
-    const query = `
-      INSERT INTO reports (
-        patient_adhaar, npi_id, doctor_id, date_of_issue,
-        title, description, priority, category
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING report_id;
-    `;
-    const values = [
-      patient_adhaar, npi_id, doctor_id, date_of_issue,
-      title, description, priority, category
-    ];
+    await client.connect();
 
-    const result = await client.query(query, values);
+    // Create reports table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS Reports (
+        report_id SERIAL PRIMARY KEY,
+        patient_adhaar VARCHAR(20) NOT NULL,
+        npi_id VARCHAR(50) NOT NULL,
+        doctor_id INT NOT NULL,
+        date_of_issue DATE NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        priority VARCHAR(50),
+        category VARCHAR(100),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        CONSTRAINT fk_doctor FOREIGN KEY (doctor_id) REFERENCES Doctors(doctor_id),
+        CONSTRAINT fk_patient FOREIGN KEY (patient_adhaar) REFERENCES Patients(adhaar_no) ON DELETE CASCADE,
+        CONSTRAINT fk_hospital FOREIGN KEY (npi_id) REFERENCES Hospitals(npi_id)
+      );
+    `);
 
-    res.status(201).json({
-      message: 'Report created successfully!',
-      report_id: result.rows[0].report_id
-    });
   } catch (err) {
-    console.error('Error creating report:', err);
-    res.status(500).json({ error: 'Failed to create report.' });
+    console.error("❌ Error creating reports table:", err);
+  } finally {
+    await client.end();
   }
-});
+}
 
-module.exports = router;
+module.exports = { initReportTable };
