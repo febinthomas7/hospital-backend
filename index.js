@@ -22,13 +22,14 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+
 app.use(express.json()); // Middleware to parse JSON bodies
 
 app.use(bodyParser.json());
 
 app.use("/api/patient", patientRoute);
-app.use("/doctor", DoctorRoute);
-app.use("/Hospital", HospitalRoute);
+app.use("/api/doctor", DoctorRoute);
+app.use("/api/hospital", HospitalRoute);
 
 // // All routes Expect created routes
 // app.use((req, res, next) => {

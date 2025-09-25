@@ -1,15 +1,14 @@
-const { Client } = require("pg");
+const { Pool } = require("pg");
 const DATABASE_URL = `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?sslmode=require`;
-const client = new Client({
-  connectionString: DATABASE_URL, // e.g. postgres://user:password@host:5432/dbname
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: { rejectUnauthorized: false }, // needed for Render/Heroku
 });
 
-client
-  .connect()
-  .then(() => console.log("✅ Connected to PostgreSQL"))
-  .catch((err) => {
-    console.error("❌ PostgreSQL connection error:", err);
-  });
+pool
+  .query("SELECT NOW()")
+  .then((res) => console.log("✅ Connected to PostgreSQL at:", res.rows[0].now))
+  .catch((err) => console.error("❌ PostgreSQL connection error:", err));
 const createPatientsTable = async () => {
   const query = `
     CREATE TABLE IF NOT EXISTS patients (
@@ -31,11 +30,63 @@ const createPatientsTable = async () => {
   `;
 
   try {
-    await client.query(query);
+    await pool.query(query);
     console.log("✅ Patients table ready");
   } catch (err) {
     console.error("❌ Error creating Patients table:", err);
   }
 };
+
+const createHospitalTable = async () => {
+  // Create Hospitals table if it doesn't exist
+  const query = `
+      CREATE TABLE IF NOT EXISTS hospitals (
+        hospital_id SERIAL PRIMARY KEY,
+        name VARCHAR(200) NOT NULL,
+        org_issued_name VARCHAR(100) NOT NULL,
+        npi_id VARCHAR(50) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        location TEXT,
+        state VARCHAR(100),
+        country VARCHAR(100),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+
+  try {
+    await pool.query(query);
+    console.log("✅ Hospital table ready");
+  } catch (err) {
+    console.error("❌ Error creating Hospital table:", err);
+  }
+};
+
+const createDoctorTable = async () => {
+  const query = `CREATE TABLE IF NOT EXISTS Doctors (
+  doctor_id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  phone_no VARCHAR(20),
+  date_of_birth DATE,
+  address TEXT,
+  specialization VARCHAR(100),
+  hospital_id INT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT fk_hospital
+    FOREIGN KEY (hospital_id)
+    REFERENCES Hospitals(hospital_id)
+    ON DELETE CASCADE
+)`;
+
+  try {
+    await pool.query(query);
+    console.log("✅ Doctor table ready");
+  } catch (err) {
+    console.error("❌ Error creating Doctor table:", err);
+  }
+};
+createHospitalTable();
 createPatientsTable();
-module.exports = client;
+createDoctorTable();
+module.exports = pool;

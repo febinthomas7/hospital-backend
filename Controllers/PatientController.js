@@ -1,11 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const client = require("../db-config");
+const pool = require("../db-config");
 const PatientModel = require("../Models/Patient");
 
 // ---------------- Register Patient ----------------
 const registerPatient = async (req, res) => {
-  console.log("Register request body:", req.body);
   try {
     const {
       name,
@@ -30,7 +29,7 @@ const registerPatient = async (req, res) => {
     const table = PatientModel.tableName;
 
     // Check if email exists
-    const emailCheck = await client.query(
+    const emailCheck = await pool.query(
       `SELECT * FROM ${table} WHERE ${cols.gmail} = $1`,
       [gmail]
     );
@@ -38,7 +37,7 @@ const registerPatient = async (req, res) => {
       return res.status(400).json({ error: "Email already registered" });
 
     // Check if adhaar exists
-    const adhaarCheck = await client.query(
+    const adhaarCheck = await pool.query(
       `SELECT * FROM ${table} WHERE ${cols.adhaar_no} = $1`,
       [adhaar_no]
     );
@@ -71,11 +70,11 @@ const registerPatient = async (req, res) => {
       emergency_contact_phone,
     ];
 
-    const { rows } = await client.query(insertQuery, values);
-    return res.status(201).json({ data: rows[0] });
+    const { rows } = await pool.query(insertQuery, values);
+    return res.status(201).json({ data: rows[0], status: true });
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: "Server error", status: false });
   }
 };
 
@@ -93,7 +92,7 @@ const loginPatient = async (req, res) => {
     const table = PatientModel.tableName;
 
     // Fetch patient by email
-    const { rows } = await client.query(
+    const { rows } = await pool.query(
       `SELECT * FROM ${table} WHERE ${cols.adhaar_no} = $1`,
       [adhaar_no]
     );
@@ -117,10 +116,10 @@ const loginPatient = async (req, res) => {
 
     // Return patient info without password
     const { [cols.password_hash]: _, ...patientData } = patient;
-    res.status(200).json({ token, data: patientData });
+    res.status(200).json({ token, data: patientData, status: true });
   } catch (err) {
     console.error("Login error:", err);
-    return res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: "Server error", status: false });
   }
 };
 

@@ -1,35 +1,19 @@
+// models/HospitalModel.js
 
-const { Client } = require('pg');
-require('dotenv').config();
+const HospitalModel = {
+  tableName: "Hospitals",
+  columns: {
+    hospital_id: "hospital_id",
+    name: "name",
+    location: "location",
+    state: "state",
+    country: "country",
+    npi_id: "npi_id",
+    org_issued_name: "org_issued_name",
+    password: "password", // 🔹 Add this
 
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
+    created_at: "created_at",
+  },
+};
 
-async function initHospitalTable() {
-  try {
-    await client.connect();
-
-    // Create hospitals table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS Hospitals (
-        hospital_id SERIAL PRIMARY KEY,
-        name VARCHAR(200) NOT NULL,
-        location TEXT,
-        state VARCHAR(100),
-        country VARCHAR(100),
-        npi_id VARCHAR(50) UNIQUE,
-        org_issued_name VARCHAR(100),
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `);
-
-  } catch (err) {
-    console.error("❌ Error creating hospitals table:", err);
-  } finally {
-    await client.end();
-  }
-}
-
-module.exports = { initHospitalTable };
+module.exports = HospitalModel;
