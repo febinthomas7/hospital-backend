@@ -1,52 +1,48 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
+require("./db-config.js");
 
-const ExpressError=require("./Utils/expressError");
+const cors = require("cors");
 const patientRoute = require("./Routes/Pateint");
 const DoctorRoute = require("./Routes/Doctor");
 const HospitalRoute = require("./Routes/Hospital");
+// const ExpressError = require("./Utils/expressError");
+
+// const UserRoute = require("./Routes/User.js");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Middleware to parse JSON bodies
 
-const bodyParser = require('body-parser');
-require('dotenv').config();
+const bodyParser = require("body-parser");
 
-const { initDoctorTable } = require('./Models/Doctor.js');
-const { initNoticeTable } = require("./Models/Notice.js");
-const { initPatientTable } = require("./Models/Patient.js");
-const { initReportTable } = require("./Models/Reports.js");
-const { initHospitalTable } = require("./Models/Hospital.js");
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGINS, // Or your frontend domain
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+app.use(express.json()); // Middleware to parse JSON bodies
 
 app.use(bodyParser.json());
 
-// Initialize table on startup
-initHospitalTable();
-initDoctorTable();
-initNoticeTable();
-initPatientTable();
-initReportTable();
+app.use("/api/patient", patientRoute);
+app.use("/doctor", DoctorRoute);
+app.use("/Hospital", HospitalRoute);
 
-
-
-// Root route
-app.use("/patient",patientRoute);
-app.use("/doctor",DoctorRoute);
-app.use("/Hospital",HospitalRoute);
-
-// All routes Expect created routes
-app.use((req, res, next) => {
-  next(new ExpressError(404, "Page Not Found"));
-});
+// // All routes Expect created routes
+// app.use((req, res, next) => {
+//   next(new ExpressError(404, "Page Not Found"));
+// });
 
 //Middleware
-app.use((err,req,res,next)=>{
-  let {statusCode= 500 ,message ="something went wrong"}=err;
-  res.status(statusCode).send({message});
+app.use((err, req, res, next) => {
+  let { statusCode = 500, message = "something went wrong" } = err;
+  res.status(statusCode).send({ message });
 });
 
 // Specify the port
-const port = 3000;
+const port = 5000;
 
 // Start the server
 app.listen(port, () => {

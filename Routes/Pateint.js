@@ -1,30 +1,18 @@
+const {
+  loginPatient,
+  registerPatient,
+} = require("../Controllers/PatientController");
+
 const router = require("express").Router();
-const wrapAsync=require("../utils/wrapAsync.js");
-const multer  = require("multer");
-const {storage} = require("../cloudConfig.js");
-const upload = multer({ storage });
 
-// const {
-//   signin,
-//   login,
-//   request_reset,
-//   verify_otp,
-//   send_welcome_email,
-// } = require("../Controllers/Patient");
+router.get("/userlist", (req, res) => {
+  console.log("hi");
 
+  res.status(200).json({ data: "hello" });
+});
 
-// const {
-//   signinValidation,
-//   logininValidation,
-// } = require("../Middlewares/AuthValidation");
-// const { cart, deleteCart } = require("../Controllers/cart");
-// const getOrders = require("../Controllers/orders");
-// router.post("/signin", signinValidation, signin);
+router.post("/register", registerPatient);
 
-// router.post("/login", logininValidation, login);
-
-router.get("/",(req,res)=>{
-    res.send("hello");
-})
+router.post("/login", loginPatient);
 
 module.exports = router;

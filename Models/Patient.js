@@ -1,44 +1,21 @@
+const PatientModel = {
+  tableName: "Patients",
+  columns: {
+    patient_id: "patient_id",
+    name: "name",
+    phone_no: "phone_no",
+    gmail: "gmail", // just the column name
+    adhaar_no: "adhaar_no",
+    password_hash: "password_hash",
+    date_of_birth: "date_of_birth",
+    gender: "gender",
+    address: "address",
+    blood_group: "blood_group",
+    emergency_contact_name: "emergency_contact_name",
+    emergency_contact_relation: "emergency_contact_relation",
+    emergency_contact_phone: "emergency_contact_phone",
+    created_at: "created_at",
+  },
+};
 
-const { Client } = require('pg');
-require('dotenv').config();
-
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
-
-async function initPatientTable() {
-  try {
-    await client.connect();
-
-    // Ensure schema exists
-    await client.query(`CREATE SCHEMA IF NOT EXISTS hospital;`);
-
-    // Create patients table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS Patients (
-        patient_id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        phone_no VARCHAR(20),
-        gmail VARCHAR(150) UNIQUE NOT NULL,
-        adhaar_no VARCHAR(20) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        date_of_birth DATE,
-        gender VARCHAR(20),
-        address TEXT,
-        blood_group VARCHAR(10),
-        emergency_contact_name VARCHAR(100),
-        emergency_contact_relation VARCHAR(50),
-        emergency_contact_phone VARCHAR(20),
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `);
-
-  } catch (err) {
-    console.error("❌ Error creating patient table:", err);
-  } finally {
-    await client.end();
-  }
-}
-
-module.exports = { initPatientTable };
+module.exports = PatientModel;
