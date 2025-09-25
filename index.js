@@ -17,6 +17,7 @@ const { initNoticeTable } = require("./Models/Notice.js");
 const { initPatientTable } = require("./Models/Patient.js");
 const { initReportTable } = require("./Models/Reports.js");
 const { initHospitalTable } = require("./Models/Hospital.js");
+const { initAdvertisementTable } = require("./Models/Advertisement.js");
 
 app.use(bodyParser.json());
 
@@ -26,6 +27,7 @@ initDoctorTable();
 initNoticeTable();
 initPatientTable();
 initReportTable();
+initAdvertisementTable();
 
 
 

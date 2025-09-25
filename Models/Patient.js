@@ -17,7 +17,6 @@ async function initPatientTable() {
     // Create patients table
     await client.query(`
       CREATE TABLE IF NOT EXISTS Patients (
-        patient_id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         phone_no VARCHAR(20),
         gmail VARCHAR(150) UNIQUE NOT NULL,
