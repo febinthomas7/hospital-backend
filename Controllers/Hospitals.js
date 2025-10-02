@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const pool = require("../db-config"); // Your pg Pool instance
 const HospitalModel = require("../Models/Hospital");
-
+const jwt = require("jsonwebtoken");
 const registerHospital = async (req, res) => {
   const { name, org_issued_name } = req.body;
 
@@ -18,7 +18,7 @@ const registerHospital = async (req, res) => {
     // Generate random password
     const plainPassword = Math.random().toString(36).slice(-8);
     const password = await bcrypt.hash(plainPassword, 10);
-
+    console.log(npiId, plainPassword);
     // Insert into DB
     const query = `
       INSERT INTO ${HospitalModel.tableName} 

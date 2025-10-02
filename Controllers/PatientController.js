@@ -100,6 +100,7 @@ const loginPatient = async (req, res) => {
     const patient = rows[0];
     if (!patient) return res.status(400).json({ error: "Invalid credentials" });
 
+    const role = "patient";
     // Compare password
     const isMatch = await bcrypt.compare(password, patient[cols.password_hash]);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
@@ -108,7 +109,7 @@ const loginPatient = async (req, res) => {
     const token = jwt.sign(
       {
         patient_id: patient[cols.patient_id],
-        adhaar_no: patient[cols.adhaar_no],
+        role: role,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
