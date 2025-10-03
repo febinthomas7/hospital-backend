@@ -13,7 +13,7 @@ const registerHospital = async (req, res) => {
 
   try {
     // Generate unique NPI ID
-    const npiId = `NPI-${Math.floor(Math.random() * 90000) + 10000}`;
+    const npiId = `${Math.floor(Math.random() * 900000000000) + 100000000000}`;
 
     // Generate random password
     const plainPassword = Math.random().toString(36).slice(-8);
